@@ -1,0 +1,25 @@
+# OpenGeno session artifacts
+.planning/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local environment
+.env
+.env.local
+*.log
+
+# Defensive (in case examples grow JS / Python tooling later)
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/

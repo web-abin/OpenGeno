@@ -1,0 +1,21 @@
+{
+  "name": "opengeno",
+  "version": "0.1.0",
+  "description": "Project-wide living documentation for AI-assisted codebases. Maintains one source of truth per user-visible feature in a hierarchical feature tree, with drift detection and bidirectional code-doc linkage.",
+  "author": {
+    "name": "web-abin",
+    "email": "wellxabin@gmail.com",
+    "url": "https://github.com/web-abin"
+  },
+  "homepage": "https://github.com/web-abin/OpenGeno",
+  "repository": "https://github.com/web-abin/OpenGeno",
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "spec-driven",
+    "feature-tree",
+    "living-docs",
+    "drift-detection",
+    "claude-code"
+  ]
+}
