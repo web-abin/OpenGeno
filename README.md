@@ -201,7 +201,8 @@ architecture, and ADRs for each non-obvious choice.
 
 ## Status
 
-Early. Format version `schema: 1`. Expect breaking changes until 1.0.
+Active development. Format version `schema: 1`. v1.0 stable API targeted —
+breaking schema changes will ship with a migration via `/geno-sync`.
 
 ## License
 

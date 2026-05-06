@@ -187,7 +187,8 @@ OpenGeno 主要面向 **Claude Code**，使用它的 hooks 系统做漂移管控
 
 ## 状态
 
-早期。文档格式版本为 `schema: 1`。1.0 之前预期会有不兼容变更。
+活跃开发中。文档格式版本为 `schema: 1`。目标在 v1.0 锁定稳定 API——
+schema 不兼容变更会随 `/geno-sync` 提供迁移路径。
 
 ## License
 
