@@ -299,6 +299,18 @@ actual drift or noise.
 either a freshly-stubbed file or a placeholder. The drift checker treats this
 as "needs initial sync" rather than drift.
 
+## `.feat-tree.json` schema
+
+Project-root config file written by `/geno-init` and read by hooks /
+`/geno-sync`:
+
+| Field | Values | Read by |
+|-------|--------|---------|
+| `version` | integer (currently `1`) | All consumers |
+| `tree_path` | path string, default `"feat-tree"` | `drift-check.sh` |
+| `drift_mode` | `"warn"` \| `"block"` | `stop-check.sh` |
+| `gen_mode` | `"stub"` \| `"full"` | `/geno-sync` (to distinguish unwritten stubs from unverified full-mode prose) |
+
 ## Writing rules
 
 These rules apply to AI agents writing or updating docs:

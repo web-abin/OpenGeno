@@ -158,9 +158,21 @@ failure mode that destroys this whole system.
 
 ### Step 6 — Handle other categories
 
-- **Stubs** (`gray`): these are bootstrap stubs from `/geno-init`. Don't
-  conflate with drift. Surface them but only fill them in when the user
-  asks ("fill stubs" can be its own pass).
+- **Stubs** (`gray`): empty-SHA docs from `/geno-init`. Don't conflate
+  with drift. Their meaning depends on `gen_mode` in `.feat-tree.json`:
+  - `gen_mode: "stub"` (or missing) — section bodies are placeholders
+    (`TODO` / `待补充`). The reconciliation action is **fill**: write
+    the prose from a code read, then bump SHA only after the user
+    confirms the result is right.
+  - `gen_mode: "full"` — section bodies already contain best-effort
+    prose generated at init from a code read, but unverified. The
+    reconciliation action is **review**: read the doc against the
+    current code, correct anything wrong, then bump SHA. Don't bump
+    just because prose exists; the SHA is the verification signal,
+    not the content.
+
+  Surface both in the report; only act on them when the user asks
+  ("fill stubs" or "review full-mode docs" can be its own pass).
 - **Broken** (`broken`): for each, ask: was the file moved, renamed, or
   deleted?
   - Moved/renamed → edit the doc's `code:` to the new path.
@@ -207,5 +219,6 @@ checker but walks the user through reconciliation.
 | Treat all yellows as noise | Refactors sometimes change behavior subtly; spend 30 seconds on each |
 | Auto-edit doc content based on git diff alone | Risk of describing "what changed" rather than "current behavior" — needs judgment, not diff translation |
 | Conflate stubs with drift | Stubs are unfinished bootstrapping, not drift. Different action |
+| Bump a `gen_mode: "full"` doc's SHA without re-reading the code | Full-mode prose is unverified by definition; bumping the SHA without verification destroys the entire drift system |
 | Switch language mid-reconcile | The tree's language is fixed at init time; respect it |
 | Run sync at session-end of every change | That's what the Stop hook is for. `/geno-sync` is for catching what other people / sessions did |

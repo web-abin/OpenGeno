@@ -69,7 +69,7 @@ OpenGeno 只新增两条 slash 命令。其他所有事情——改之前先读�
 
 | 命令 | 用途 |
 |------|------|
-| [`/geno-init`](skills/geno-init/SKILL.md) | 一次性项目初始化。询问文档语言（English / 中文）、扫描代码、提议模块、生成 L1 + L2/L3 骨架、写入 `.feat-tree.json`、把工作流规则注入 `CLAUDE.md`。 |
+| [`/geno-init`](skills/geno-init/SKILL.md) | 一次性项目初始化。询问文档语言（English / 中文）、漂移模式、以及生成模式（默认只生成骨架；也可选一次性生成完整文档），扫描代码、提议模块、生成 L1 + L2 + L3，写入 `.feat-tree.json`、把工作流规则注入 `CLAUDE.md`。 |
 | [`/geno-sync`](skills/geno-sync/SKILL.md) | 按需漂移检测与对账。扫整棵树、报告自上次同步以来的漂移、引导你修复。 |
 
 ## 不需要命令的持续行为

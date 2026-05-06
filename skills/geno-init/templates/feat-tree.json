@@ -1,5 +1,6 @@
 {
   "version": 1,
   "tree_path": "feat-tree",
-  "drift_mode": "warn"
+  "drift_mode": "warn",
+  "gen_mode": "stub"
 }

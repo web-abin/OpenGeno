@@ -1,7 +1,11 @@
-# Example — TodoApp
+# Example — TodoApp (`gen_mode: "stub"`-shaped)
 
 A complete (if small) feature tree for a fictional todo app. Use this as a
 reference when starting your own tree.
+
+For the contrast — what `/geno-init` produces when the user picks
+**one-shot full docs** instead — see the sibling [`todo-app-full/`](../todo-app-full/)
+example.
 
 ## What's here
 

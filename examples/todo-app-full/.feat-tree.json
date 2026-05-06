@@ -2,5 +2,5 @@
   "version": 1,
   "tree_path": "feat-tree",
   "drift_mode": "warn",
-  "gen_mode": "stub"
+  "gen_mode": "full"
 }

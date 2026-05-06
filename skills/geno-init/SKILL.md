@@ -1,6 +1,6 @@
 ---
 name: geno-init
-description: Initialize an OpenGeno feature tree for a project. Asks the user to pick a documentation language (English or Chinese, default English), scans the codebase, proposes a module breakdown, generates the L1 root index, L2 module indexes and L3 feature stubs in the chosen language, writes .feat-tree.json, and injects the OpenGeno workflow rules into CLAUDE.md (and AGENTS.md if present). Use when starting OpenGeno on a new project. Run once per project.
+description: Initialize an OpenGeno feature tree for a project. Asks the user to pick a documentation language (English or Chinese, default English), a drift mode, and a generation mode (stub-only by default, or one-shot full docs that fills every L3 section now). Scans the codebase, proposes a module breakdown, generates the L1 root index, L2 module indexes and L3 feature docs in the chosen language, writes .feat-tree.json, and injects the OpenGeno workflow rules into CLAUDE.md (and AGENTS.md if present). Use when starting OpenGeno on a new project. Run once per project.
 user-invocable: true
 allowed-tools: "Read Write Edit Bash Glob Grep AskUserQuestion"
 hooks:
@@ -68,10 +68,34 @@ Use `AskUserQuestion`, phrased in the chosen language:
 
 Store as `DRIFT_MODE`.
 
-### Step 3 — Scan the codebase
+### Step 3 — Pick the generation mode
 
-Glob for likely feature surfaces. Don't read every file — look at
-structure. Useful patterns:
+Use `AskUserQuestion`, phrased in the chosen language:
+
+- Options:
+  1. **Stub** (Recommended): shallow scan, generate L3 stubs, fill on demand
+  2. **One-shot full docs**: deeper scan, attempt to fill every L3 section now
+
+Store as `MODE = "stub"` or `MODE = "full"`.
+
+`stub` is the default because deeper code reading is expensive and
+hallucination-prone — the user should opt in deliberately. `full` is
+useful when the codebase is small and stable, and the user wants a
+complete first-pass tree to review wholesale rather than incrementally.
+
+`MODE` controls two things downstream: scan depth in Step 4, and L3
+body content in Step 8. Everything else is identical between modes.
+
+### Step 4 — Scan the codebase
+
+Scan depth depends on `MODE`:
+
+- `MODE=stub` → shallow scan, structure only (current behavior).
+- `MODE=full` → after the shallow pass identifies features, open the
+  relevant route/controller/page/screen files for each feature and
+  read enough to populate L3 sections in Step 8.
+
+Glob for likely feature surfaces. Useful patterns:
 
 | Stack | Look at |
 |-------|---------|
@@ -87,9 +111,11 @@ Identify:
 2. **Sub-features** within each — specific screens, flows, or logic units
 3. **Out-of-scope items** — i18n, theming, build tooling, analytics
 
-Keep the scan shallow. The goal is a *proposal*, not a finished tree.
+For `MODE=stub`, keep the scan shallow — the goal is a *proposal*, not
+a finished tree. For `MODE=full`, the proposal pass is still shallow;
+the deeper read happens per-feature during Step 8.
 
-### Step 4 — Propose, in the user's language
+### Step 5 — Propose, in the user's language
 
 Show the user the draft module list with one-line descriptions, **in
 the chosen language**. Use `AskUserQuestion` (also in the chosen
@@ -97,7 +123,7 @@ language) to ask whether the proposal is acceptable.
 
 Iterate until they accept.
 
-### Step 5 — Generate L1 root index
+### Step 6 — Generate L1 root index
 
 Pick the right template:
 
@@ -113,52 +139,72 @@ Write `feat-tree/index.md` from the template, replacing placeholders:
 All generated prose (module descriptions, etc.) must be in the chosen
 language.
 
-### Step 6 — Generate L2 module stubs
+### Step 7 — Generate L2 module stubs
 
 For each accepted module, write `feat-tree/<module>/index.md` from
 `templates/module-index.md` or `templates/module-index.zh.md`. List the
 proposed features as table rows. Module description and any free-form
 text in the chosen language.
 
-### Step 7 — Generate L3 feature stubs
+### Step 8 — Generate L3 feature docs
 
-For each proposed feature, write a stub L3 doc using:
+For each proposed feature, write an L3 doc using:
 
 - UI feature → `templates/feature-ui.md` (en) or `templates/feature-ui.zh.md` (zh)
 - Logic feature → `templates/feature-logic.md` (en) or `templates/feature-logic.zh.md` (zh)
 
-The stub keeps:
+Frontmatter is the same in both modes:
 
-- Frontmatter filled in (`type`, `kind`, `feature`, `module`,
-  `code:` if known from scan, `last_synced_commit: ""`,
-  `last_reviewed:` today's date)
-- All section headings present (in chosen language)
-- Section bodies set to placeholder text in chosen language
-  - English: `TODO`
-  - Chinese: `待补充`
+- `type`, `kind`, `feature`, `module` filled in
+- `code:` filled from scan when known
+- `last_synced_commit: ""` (always empty at init — the doc has not
+  been reviewed against code yet, even in `full` mode)
+- `last_reviewed:` today's date
 
-**Do not** auto-fill L3 details from code-reading. That's expensive,
-hallucination-prone, and produces unreviewed docs. L3 details get filled
-in incrementally on the first real task that touches each feature
-(driven by the workflow rules in CLAUDE.md, not by this skill).
+Section bodies depend on `MODE`:
 
-### Step 8 — Write `.feat-tree.json`
+- **`MODE=stub`** (default): all section headings present in chosen
+  language; section bodies set to placeholder text — `TODO` (English)
+  or `待补充` (Chinese). L3 details get filled in incrementally on the
+  first real task that touches each feature, driven by the workflow
+  rules in CLAUDE.md.
+
+- **`MODE=full`**: read the feature's source files (identified in
+  Step 4) and write best-effort prose for each section, in the chosen
+  language. Keep `last_synced_commit: ""` regardless — full-mode
+  output is unverified by definition and a stale-or-empty SHA is
+  what tells `/geno-sync` (and the user) that the doc still needs a
+  review pass before any session bumps the SHA. Be honest in tone:
+  if a section can't be inferred from the code, leave it as the
+  placeholder text rather than guessing.
+
+In neither mode should you set `last_synced_commit` to current HEAD —
+the SHA represents *verified-against-code*, and init has not done that
+work.
+
+### Step 9 — Write `.feat-tree.json`
 
 Copy `templates/feat-tree.json` to project root, then patch
-`drift_mode` to the chosen value:
+`drift_mode` and `gen_mode` to the chosen values:
 
 ```json
 {
   "version": 1,
   "tree_path": "feat-tree",
-  "drift_mode": "warn"
+  "drift_mode": "warn",
+  "gen_mode": "stub"
 }
 ```
 
-This file controls hook behavior — `drift_mode` is read by the Stop
-hook at session-end.
+This file controls downstream behavior:
 
-### Step 9 — Inject workflow rules into CLAUDE.md / AGENTS.md
+- `drift_mode` is read by the Stop hook at session-end.
+- `gen_mode` records which generation mode the tree was bootstrapped
+  with. `/geno-sync` reads it to distinguish empty-SHA docs that are
+  *unwritten stubs* from empty-SHA docs that are *written-but-unverified
+  full-mode prose* — the two need different reconciliation actions.
+
+### Step 10 — Inject workflow rules into CLAUDE.md / AGENTS.md
 
 Read the corresponding injection template:
 
@@ -180,17 +226,23 @@ If a `BEGIN OpenGeno` marker already exists in the target file, abort
 the injection for that file (it was already injected) and warn the
 user.
 
-### Step 10 — Report
+### Step 11 — Report
 
 Print a summary in the chosen language:
 
 - Documentation language chosen
 - Drift mode chosen
+- Generation mode chosen (`stub` or `full`)
 - Number of modules created
-- Number of L3 stubs created
+- Number of L3 docs created
 - Whether `CLAUDE.md` / `AGENTS.md` was created or appended
-- Suggested next step: "Fill in L3 details on demand as you work — the
-  first task that touches each feature should expand its stub."
+- Suggested next step:
+  - `MODE=stub`: "Fill in L3 details on demand as you work — the first
+    task that touches each feature should expand its stub."
+  - `MODE=full`: "L3 bodies were generated from a one-shot code read
+    and are **unverified**. Review each doc against the code before
+    letting any session bump `last_synced_commit`. `/geno-sync` will
+    keep flagging them as `STUB` until the SHA is set."
 
 ## Language enforcement (read this twice)
 
@@ -218,7 +270,8 @@ first pass and the rule perpetuates.
 | Don't | Why |
 |-------|-----|
 | Mix languages within the tree | Defeats the language-selection contract; will be visibly wrong |
-| Auto-fill all L3 docs from code | Expensive, hallucination-prone, produces unreviewed docs |
+| Auto-fill all L3 docs from code without the user opting in | Expensive, hallucination-prone — only do this when the user explicitly chose `full` mode in Step 3, and warn them in Step 11 that the output needs review |
+| Set `last_synced_commit` to HEAD on a `full`-mode doc | Defeats the whole drift system — `full` output is unverified; SHA must stay empty until a human reviews against code |
 | Silently merge with an existing tree | Risks overwriting hand-written content |
 | Use the AI's first-pass module guess without user review | Module boundaries are a project-specific judgment call |
 | Treat infra items (i18n, theme tokens, etc.) as features | Pollutes the tree, dilutes the signal |

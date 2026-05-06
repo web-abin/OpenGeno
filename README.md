@@ -76,7 +76,7 @@ them.
 
 | Command | When |
 |---------|------|
-| [`/geno-init`](skills/geno-init/SKILL.md) | One-time project setup. Asks for documentation language (English / 中文), scans the codebase, proposes modules, generates L1 + L2/L3 stubs, writes `.feat-tree.json`, injects workflow rules into `CLAUDE.md`. |
+| [`/geno-init`](skills/geno-init/SKILL.md) | One-time project setup. Asks for documentation language (English / 中文), drift mode, and generation mode (stub-only by default, or one-shot full docs); scans the codebase, proposes modules, generates L1 + L2 + L3, writes `.feat-tree.json`, injects workflow rules into `CLAUDE.md`. |
 | [`/geno-sync`](skills/geno-sync/SKILL.md) | On-demand drift check & reconciliation. Walks the tree, reports drift since last sync, walks you through fixing it. |
 
 ## Continuous behavior (no command needed)

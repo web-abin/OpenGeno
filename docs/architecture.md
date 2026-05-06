@@ -44,9 +44,10 @@ on its own; the design is in how they compose.
 
 Two slash commands, both user-invocable:
 
-- **`/geno-init`** — one-shot bootstrap. Asks for language, scans, proposes,
-  generates the tree, writes `.feat-tree.json`, injects rules into
-  `CLAUDE.md`.
+- **`/geno-init`** — one-shot bootstrap. Asks for language, drift mode,
+  and generation mode (stub-only by default, or one-shot full docs);
+  scans, proposes, generates the tree, writes `.feat-tree.json`,
+  injects rules into `CLAUDE.md`.
 - **`/geno-sync`** — on-demand drift reconciliation. Walks the tree,
   reports drift, walks the user through fixes interactively.
 
@@ -114,12 +115,16 @@ workflow.
 User: /geno-init
   ├─► geno-init asks language (en/zh)
   ├─► geno-init asks drift mode (warn/block)
-  ├─► geno-init scans codebase
+  ├─► geno-init asks generation mode (stub/full)
+  ├─► geno-init scans codebase (depth depends on mode)
   ├─► geno-init proposes modules
   ├─► User reviews
   ├─► geno-init writes feat-tree/index.md from template
   ├─► geno-init writes feat-tree/<module>/index.md per module
-  ├─► geno-init writes feat-tree/<module>/<feature>.md per feature (stubs)
+  ├─► geno-init writes feat-tree/<module>/<feature>.md per feature
+  │    ├─► stub mode: section bodies are TODO / 待补充 placeholders
+  │    └─► full mode: best-effort prose from a deeper code read,
+  │                   last_synced_commit still empty (unverified)
   ├─► geno-init writes .feat-tree.json
   └─► geno-init appends claude-md-injection.{md,zh.md} to CLAUDE.md
 ```
