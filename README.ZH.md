@@ -5,6 +5,10 @@
 
 [English](README.md)
 
+<p align="center">
+  <img src="docs/assets/poster_zh.png" alt="OpenGeno 概览" width="600">
+</p>
+
 ## 为什么造这个
 
 [openspec](https://github.com/Fission-AI/OpenSpec) 和 [GitHub spec-kit](https://github.com/github/spec-kit)

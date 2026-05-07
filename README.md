@@ -5,6 +5,10 @@
 
 [简体中文](README.ZH.md)
 
+<p align="center">
+  <img src="docs/assets/poster.png" alt="OpenGeno overview" width="600">
+</p>
+
 ## Why
 
 Spec-driven workflows like [openspec](https://github.com/Fission-AI/OpenSpec)
